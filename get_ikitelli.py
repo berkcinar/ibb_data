@@ -5,9 +5,11 @@ import requests
 # fileobj = requests.get(url,param limit)
 # fileobj=fileobj.json()
 # print(fileobj)
-
+import json
 # importing the requests library
 import requests
+from darksky import forecast
+from datetime import datetime as dt
 
 class Solar_Generation():
     def get_ikitelli_generation(self):
@@ -30,12 +32,43 @@ class Solar_Generation():
         for i in data['result']['records']:
             print(i['Tarih'],i['Uretim (kWh)'])
 
-    def get_solar_radiaton_NASA(self):
-        URL = "https://api.darksky.net/forecast/992bb820ba82528fffc192c56bf6921e/37.8267,-122.4233"
-        r = requests.get(url=URL)
-        data = r.json()
-        print(data)
+    # def get_solar_radiaton_NASA(self):
+    #     # URL = "https://api.darksky.net/forecast/992bb820ba82528fffc192c56bf6921e/41.086903,28.765224"
+    #     URL = "https://api.darksky.net/forecast/"
+    #
+    #     api_key='992bb820ba82528fffc192c56bf6921e'
+    #     params = {'latitude':41.086903,
+    #               'longitude':28.765224,
+    #               'language':'uk'}
+    #     # params = {'SomeParam': x,
+    #     #           'SomeOtherParam': y,
+    #     #           'AnotherOne': z}
+    #
+    #     URL+=api_key+'/'
+    #
+    #     for i in params:
+    #         URL+=str(params[i])+','
+    #     print(URL)
+    #     r = requests.get(url=URL[:-1])
+    #     data = r.json()
+    #     print(data)
+
+    def get_from_darksky(self):
+        api_key = '992bb820ba82528fffc192c56bf6921e'
+        latitude= 41.086903
+        longitude=28.765224
+
+
+        energypool_latitude=41.086400
+        energypool_longitude=29.020917
+
+
+        t = dt(2013, 5, 6, 12).isoformat()
+        energypool = forecast(api_key, energypool_latitude, energypool_longitude,time=t)
+        print(energypool)
+        print(energypool['currently']['temperature'])
+        print(energypool['hourly']['data'])
     def run(self):
-        self.get_solar_radiaton_NASA()
+        self.get_from_darksky()
 
 Solar_Generation().run()
