@@ -9,26 +9,22 @@ import json
 # importing the requests library
 import requests
 from darksky import forecast
-from datetime import datetime as dt
+from datetime import datetime as dt,timedelta
+import pandas as pd
 
 class Solar_Generation():
+
     def get_ikitelli_generation(self):
         # api-endpoint
         URL = "https://data.ibb.gov.tr/api/3/action/datastore_search?resource_id=52afa9a3-2ea1-420b-a783-505cfe635ece"
-
         r = requests.get(url=URL)
         data = r.json()
-        # location given here
         param_limit = data['result']['total']
-        # defining a params dict for the parameters to be sent to the API
         PARAMS = {'limit': param_limit}
-        # sending get request and saving the response as response object
         r = requests.get(url=URL, params=PARAMS)
-        # extracting data in json format
         data = r.json()
         data['result']['total']
         print(data['result']['records'])
-
         for i in data['result']['records']:
             print(i['Tarih'],i['Uretim (kWh)'])
 
@@ -64,11 +60,76 @@ class Solar_Generation():
 
 
         t = dt(2013, 5, 6, 12).isoformat()
+        print(t)
         energypool = forecast(api_key, energypool_latitude, energypool_longitude,time=t)
         print(energypool)
         print(energypool['currently']['temperature'])
         print(energypool['hourly']['data'])
+        print(energypool['hourly']['summary'])
+        # print(energypool['hourly']['data'][0]['time'])
+        time=energypool['hourly']['data'][0]['time']
+
+        for i in energypool['hourly']['data']:
+            print(dt.fromtimestamp(i['time']).strftime('%Y-%m-%d %H:%M:%S'))
+            print(i['windSpeed'])
+        print(dt.fromtimestamp(time).strftime('%Y-%m-%d %H:%M:%S'))
+
+    def get_from_darksky_now(self):
+        d={}
+        df2=pd.DataFrame()
+        api_key = '992bb820ba82528fffc192c56bf6921e'
+        energypool_latitude=41.086400
+        energypool_longitude=29.020917
+
+        print(dt(2020, 1, 28, 12))
+        print(dt(2020, 1, 28, 12)+timedelta(hours=10))
+
+
+
+        # t = (dt(2020, 1, 28, 12).isoformat())
+
+        t=(dt(2020, 1, 28, 12)+timedelta(hours=15)).isoformat()
+        t = dt(2013, 5, 6, 12).isoformat()
+        energypool = forecast(api_key, energypool_latitude, energypool_longitude,units='si',lang='tr',time=t)
+        for i in energypool['hourly']['data']:
+            print(dt.fromtimestamp(i['time']).strftime('%Y-%m-%d %H:%M:%S'))
+            print(i['summary'])
+            df2 = df2.append({'timeslot': dt.fromtimestamp(i['time']).strftime('%Y-%m-%d %H:%M:%S'),
+                              'summary': i['summary'],
+                              'precipIntensity': i['precipIntensity'],
+                              'precipProbability': i['precipProbability'],
+                              'temperature': i['temperature'],
+                              'apparentTemperature': i['apparentTemperature'],
+                              'dewPoint': i['dewPoint'],
+                              'humidity': i['humidity'],
+                              # 'pressure': i['pressure'],
+                              'windSpeed': i['windSpeed'],
+                              'windBearing': i['windBearing'],
+                              'cloudCover': i['cloudCover'],
+                              'uvIndex': i['uvIndex'],
+                              'visibility': i['visibility'],
+                              },
+                             ignore_index=True)
+
+        print(df2.dtypes)
+        print(df2.head())
+        print(df2['timeslot'])
+
+
+
+
+
+
+
+
+
+        # time=energypool['hourly']['time']
+        # print(dt.fromtimestamp(time).strftime('%Y-%m-%d %H:%M:%S'))
+
+
+
     def run(self):
-        self.get_from_darksky()
+        # self.get_from_darksky()
+        self.get_from_darksky_now()
 
 Solar_Generation().run()
